@@ -66,7 +66,7 @@ object Utilities {
     }
     var minSoFar = Int.MaxValue
     var minSeam:Stream[(Int, Int)] = Stream.empty
-    for (v <- curr) {
+    for (v <- prev) {
       if (v._1 < minSoFar) {
         minSoFar = v._1
         minSeam = v._2

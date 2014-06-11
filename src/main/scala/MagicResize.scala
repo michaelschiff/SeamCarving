@@ -9,6 +9,7 @@ object MagicResize {
     val Right(RGBImage(img)) = Input(bytes)
     println("Read Image")
     val energy = Utilities.gradientMagnitude(img)
+    var seam = Utilities.minSeam(energy)
     val outputBytes = Output(new Image[RGB] {
             val width = energy.width
             val height = energy.height
