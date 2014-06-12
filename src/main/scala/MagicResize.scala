@@ -10,11 +10,13 @@ object MagicResize {
     println("Read Image")
     val energy = Utilities.gradientMagnitude(img)
     var seam = Utilities.minSeam(energy)
-    val outputBytes = Output(new Image[RGB] {
+    val outputBytes = Output(Utilities.highlightSeam(new Image[RGB] {
             val width = energy.width
             val height = energy.height
             def apply(x: Int, y:Int): RGB = RGB(energy(x,y).white)
-          }, PNG)
+          }, seam), PNG)
+
+    //val outputBytes = Output(energy, PNG)
     println(outputBytes)
     Utilities.writeBytesToFile(outputBytes, "/Users/michaelschiff/Desktop/test1.png")
   }

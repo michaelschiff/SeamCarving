@@ -1,6 +1,7 @@
 package magicresize
 
 import java.io.{File, FileInputStream, FileOutputStream, BufferedOutputStream}
+import java.util
 import org.apache.commons.io.IOUtils
 import scala.math.{sqrt, pow, Numeric}
 import ps.tricerato.pureimage.{RGB, Gray, Image}
@@ -35,10 +36,10 @@ object Utilities {
     }
   }
 
-  def minSeam(img: Image[Gray]): Stream[(Int, Int)] = {
-    var prev = new Array[(Int, Stream[(Int, Int)])](img.width)
-    var curr = new Array[(Int, Stream[(Int, Int)])](img.width)
-    for (x <- 0 to img.width-1) { prev(x) = (img(x, 0).white, Stream.empty) }
+  def minSeam(img: Image[Gray]): Set[(Int, Int)] = {
+    var prev = new Array[(Byte, Set[(Int, Int)])](img.width)
+    var curr = new Array[(Byte, Set[(Int, Int)])](img.width)
+    for (x <- 0 to img.width-1) { prev(x) = (img(x, 0).white, Set[(Int, Int)]()) }
     for (y <- 1 to img.height-1) {
       for (x <- 0 to img.width-1) {
         var minSoFar = Int.MaxValue
@@ -59,13 +60,13 @@ object Utilities {
             minPix = (x+1,y-1)
           }
         }
-        curr(x) = (minSoFar, minPix #:: prev(minPix._1)._2)
+        curr(x) = (minSoFar.toByte, prev(minPix._1)._2 + minPix)
       }
       prev = curr
-      curr = new Array[(Int, Stream[(Int, Int)])](img.width)
+      curr = new Array[(Byte, Set[(Int, Int)])](img.width)
     }
     var minSoFar = Int.MaxValue
-    var minSeam:Stream[(Int, Int)] = Stream.empty
+    var minSeam:Set[(Int, Int)] = Set[(Int, Int)]()
     for (v <- prev) {
       if (v._1 < minSoFar) {
         minSoFar = v._1
@@ -73,5 +74,19 @@ object Utilities {
       }
     }
     minSeam
+  }
+
+  def highlightSeam(img:Image[RGB], seam:Set[(Int, Int)]): Image[RGB] = {
+    new Image[RGB] {
+      def width = img.width;
+      def height = img.height;
+      def apply(x:Int, y:Int): RGB = {
+        if (seam contains (x,y)) {
+          RGB(255)
+        } else {
+          img(x,y)
+        }
+      }
+    }
   }
 }
