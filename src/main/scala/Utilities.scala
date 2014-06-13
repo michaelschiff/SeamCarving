@@ -31,15 +31,19 @@ object Utilities {
       def apply(x: Int, y:Int): Gray = {
         val xGradient = if (x == 0 || x == img.width-1) 0 else gradient(img(x-1, y), img(x+1, y))
         val yGradient = if (y == 0 || y == img.height-1) 0 else gradient(img(x, y-1), img(x, y+1))
-        Gray(magnitude(xGradient.toInt, yGradient.toInt).toInt)
+        //if (Gray(magnitude(xGradient.toInt, yGradient.toInt).toInt).white.toInt < 0) {println("bang")}
+        /*
+         * this is to handle Gray being represented with Byte, which for values > 127 is negative because of 2's complement
+         */
+        Gray(math.min(magnitude(xGradient.toInt, yGradient.toInt).toInt, 127))
       }
     }
   }
 
   def minSeam(img: Image[Gray]): Set[(Int, Int)] = {
-    var prev = new Array[(Byte, Set[(Int, Int)])](img.width)
-    var curr = new Array[(Byte, Set[(Int, Int)])](img.width)
-    for (x <- 0 to img.width-1) { prev(x) = (img(x, 0).white, Set[(Int, Int)]()) }
+    var prev = new Array[(Int, Set[(Int, Int)])](img.width)
+    var curr = new Array[(Int, Set[(Int, Int)])](img.width)
+    for (x <- 0 to img.width-1) { prev(x) = (img(x, 0).white.toInt, Set[(Int, Int)]()) }
     for (y <- 1 to img.height-1) {
       for (x <- 0 to img.width-1) {
         var minSoFar = Int.MaxValue
@@ -60,10 +64,10 @@ object Utilities {
             minPix = (x+1,y-1)
           }
         }
-        curr(x) = (minSoFar.toByte, prev(minPix._1)._2 + minPix)
+        curr(x) = (minSoFar, prev(minPix._1)._2 + minPix)
       }
       prev = curr
-      curr = new Array[(Byte, Set[(Int, Int)])](img.width)
+      curr = new Array[(Int, Set[(Int, Int)])](img.width)
     }
     var minSoFar = Int.MaxValue
     var minSeam:Set[(Int, Int)] = Set[(Int, Int)]()
@@ -73,6 +77,7 @@ object Utilities {
         minSeam = v._2
       }
     }
+    println(minSoFar)
     minSeam
   }
 
@@ -89,4 +94,16 @@ object Utilities {
       }
     }
   }
+
+  def removeSeam(img: Image[RGB], seam:Set[(Int, Int)]): Image[RGB] = {
+
+    new Image[RGB] {
+      def width = img.width-1
+      def height = img.height
+      def apply(x:Int, y:Int):RGB = {
+        if (x )
+      }
+    }
+  }
+
 }
